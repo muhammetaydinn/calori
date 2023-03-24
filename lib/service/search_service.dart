@@ -2,8 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import '../models/item_model.dart';
-
+import '../models/user_model.dart';
 
 const String _baseUrl = "https://api.calorieninjas.com/v1/nutrition?query=";
 
@@ -19,7 +18,8 @@ class Services {
       var data1 = data["items"];
       if (data1 != null) {
         for (var i = 0; i < data1.length; i++) {
-          Items user = Items.fromMap(data1[i]);
+          // Items user = Items.fromMap(data1[i]);
+          Items user = Items.fromJson(data1[i]);
           list.add(user);
         }
       }

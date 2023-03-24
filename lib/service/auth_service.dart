@@ -24,7 +24,7 @@ class AuthService {
       //     body: json.encode({"token": customToken, "returnSecureToken": true}));
 
       final responseData = json.decode(response.body);
-      print(responseData);
+      print("----------------$responseData");
 
       if (responseData['error'] != null) {
         print(responseData['error']['message']);
@@ -68,7 +68,7 @@ class AuthService {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         prefs.setString("token", responseData['localId']);
         return "success";
-        
+
         // İstek başarılı oldu, kullanıcının bilgilerini responseData içinden alın
       }
     } catch (error) {
@@ -77,5 +77,4 @@ class AuthService {
       return error.toString();
     }
   }
-  
 }

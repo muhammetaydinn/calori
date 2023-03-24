@@ -1,10 +1,9 @@
-import 'package:calori/models/user_model.dart';
 import 'package:calori/providers/auth_provider.dart';
 import 'package:calori/service/food_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../models/item_model.dart';
+import '../models/user_model.dart';
 import '../providers/daily_my_foods.dart';
 import '../providers/search_provider.dart';
 
@@ -73,7 +72,17 @@ class _SearchScreenState extends State<SearchScreen> {
                             itemCount: dailyFoodProvider.dailyMyFoods.length,
                             itemBuilder: (context, index) => Dismissible(
                               key: UniqueKey(),
-                              onDismissed: (direction) {
+                              onDismissed: (direction) async {
+                                String? token = await authProvider.getToken();
+
+                                // var a = await foodService.updateRemoveUser(
+                                //     Items.fromMap(dailyFoodProvider
+                                //         .dailyMyFoods[index]
+                                //         .toMap()),
+                                //     token!);
+
+                                // authProvider.getToken().toString());
+
                                 dailyFoodProvider.removeFood(
                                     dailyFoodProvider.dailyMyFoods[index]);
                               },
@@ -224,16 +233,31 @@ class _SearchScreenState extends State<SearchScreen> {
                                     onPressed: () async {
                                       String? token =
                                           await authProvider.getToken();
+                                      //--------------------->>>>>>>>>>>>>>
 
                                       // var a = await foodService.postUser(
                                       //     UserModel(uid: token, items: []));
-                                      foodService.updateUser(
-                                          UserModel(items: [
-                                            Items.fromMap(searchProvider
-                                                .searchList[index]
-                                                .toMap()),
-                                          ], uid: token!),
-                                          token);
+                                      //--------------------->>>>>>>>>>>>>>
+                                      //TODO:
+                                      // String? token =
+                                      //     await authProvider.getToken();
+                                      var b = await foodService.updateUser(
+                                          UserModel(
+                                              uid: token,
+                                              items: dailyFoodProvider
+                                                  .dailyMyFoods
+                                                  .map((e) => Items.fromJson(
+                                                      e.toJson()))
+                                                  .toList()),
+                                          token!);
+                                      //--------------------->>>>>>>>>>>>>>
+
+                                      // var b = await foodService.updateAddUser(
+                                      //     Items.fromJson(searchProvider
+                                      //         .searchList[index]
+                                      //         .toJson()),
+                                      //     token!);
+
                                       dailyFoodProvider.addFood(
                                           searchProvider.searchList[index]);
                                       // if (a != null) {

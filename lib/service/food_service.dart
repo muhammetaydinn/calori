@@ -15,7 +15,7 @@ class FoodService {
       var data = json.decode(response.body);
       if (data != null) {
         for (var key in data.keys) {
-          UserModel user = UserModel.fromMap(data[key]);
+          UserModel user = UserModel.fromJson(data[key]);
           user.uid = key;
           list.add(user);
         }
@@ -26,9 +26,16 @@ class FoodService {
 
   Future<UserModel?> getUserById(String uid) async {
     http.Response response = await http.get(getUrl("users/$uid"));
+    var data = json.decode(response.body);
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      return UserModel.fromJson(response.body)..uid = uid;
+      if (data != null) {
+        return UserModel(
+            uid: uid,
+            items: data["items"].map<Items>((e) => Items.fromJson(e)).toList());
+      } else {
+        return null;
+      }
     } else {
       return null;
     }
@@ -36,7 +43,7 @@ class FoodService {
 
   Future<UserModel?> postUser(UserModel user) async {
     http.Response response = await http.post(getUrl("users"),
-        body: user.toJson(), headers: {"Content-Type": "application/json"});
+        body: jsonEncode(user), headers: {"Content-Type": "application/json"});
     if (response.statusCode >= 200 && response.statusCode < 300) {
       var data = json.decode(response.body);
       user.uid = data["name"];
@@ -48,8 +55,27 @@ class FoodService {
 
   Future<bool> updateUser(UserModel user, String uid) async {
     http.Response response = await http.put(getUrl("users/$uid/"),
-        body: user.toJson(), headers: {"Content-Type": "application/json"});
+        body: jsonEncode(user), headers: {"Content-Type": "application/json"});
     return response.statusCode >= 200 && response.statusCode < 300;
+  }
+
+  Future<bool> updateAddUser(Items item, String uid) async {
+    // update user and add new item
+    var a = await getUserById(uid);
+    if (a != null) {
+      a.items!.add(item);
+      http.Response response = await http.put(getUrl("users/$uid/"),
+          body: jsonEncode(a), headers: {"Content-Type": "application/json"});
+      return response.statusCode >= 200 && response.statusCode < 300;
+    } else {
+      http.Response res = await http.post(getUrl("users/$uid/"),
+          body: {
+            "items": [item.toJson()],
+            "uid": uid
+          }.toString(),
+          headers: {"Content-Type": "application/json"});
+      return res.statusCode >= 200 && res.statusCode < 300;
+    }
   }
 
   Future<bool> deleteUser(String uid) async {
